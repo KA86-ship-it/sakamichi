@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>本日の坂道</title>
+
+<style>
+body {
+    margin: 0;
+    background: #000;
+    color: #eee;
+    font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+/* ===== UI（常に最前面） ===== */
+.ui {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 100;
+    pointer-events: none;
+}
+
+.counter {
+    text-align: center;
+    font-size: 13px;
+    color: #b0b0b0;
+    margin-top: 6px;
+}
+
+.message {
+    text-align: center;
+    font-size: 16px;
+    color: #f0f0f0;
+    margin-top: 6px;
+}
+
+/* ===== 坂道 ===== */
+.road {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 88%;
+    height: 100%;
+    transform: translateX(-50%);
+    z-index: 1;
+    pointer-events: none;
+    clip-path: polygon(40% 0%, 60% 0%, 95% 100%, 5% 100%);
+    background: linear-gradient(
+        to bottom,
+        #050505 0%,
+        #141414 15%,
+        #262626 30%,
+        #3a3a3a 45%,
+        #555555 65%,
+        #6b6b6b 85%,
+        #7a7a7a 100%
+    );
+    background-size: 100% 360%;
+    transition: background-position 0.55s linear;
+}
+
+/* ===== ボタン ===== */
+.button-area {
+    position: absolute;
+    bottom: 70px;
+    width: 100%;
+    text-align: center;
+    z-index: 50;
+}
+
+button {
+    font-size: 22px;
+    padding: 14px 40px;
+    border-radius: 40px;
+    border: none;
+    background: #eee;
+    color: #000;
+    cursor: pointer;
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+    <div class="ui">
+        <div class="counter" id="counter">0 / 100</div>
+        <div class="message" id="message">坂は続いています</div>
+    </div>
+
+    <div class="road" id="road"></div>
+
+    <div class="button-area">
+        <button id="climbBtn" onclick="climb()">上る</button>
+    </div>
+
+</div>
+
+<script>
+let step = 0;
+let finished = false;
+let isLocked = false;
+
+/* ===== 語彙：120個（余裕を持たせて消失防止） ===== */
+const words = [
+"一歩目","足元が流れる","傾斜を意識する","まだ低い","呼吸を整える",
+"前進中","坂は正直","足が重い","同じ角度","淡々",
+"無言で進む","高さは不明","勾配に慣れる","風はない","引き返さない",
+"足音だけ","景色は変わらない","登坂中","脚が仕事をする","静かな運動",
+"思考が減る","数だけが増える","一定の傾き","重力を感じる","まだ途中",
+"同じ坂","疲労は情報","高度更新","反復","足元が後ろへ",
+"進行方向は上","無音","斜面に集中","余計な考えが消える","進んでいる",
+"止まらない","坂が続く","体感のみ","淡い影","一歩ずつ",
+"数を重ねる","静止して見える","実際は動く","進行継続","まだ登る",
+"高さを稼ぐ","脚が覚える","前へ","変化は微小","確実",
+"ここも途中","同じ動作","意識が単純","呼吸一定","斜面は変わらない",
+"登っている","足元だけが動く","静かな粘り","黙々","疲れはある",
+"戻れない角度","進むしかない","淡々と","積み重ね","坂は残る",
+"前進感","時間が薄れる","角度は一定","体が先に行く","登坂感覚",
+"脚が慣れる","まだ終わらない","数字が示す","歩幅一定","静止と前進",
+"影が濃い","重さを超える","ここも坂","変化なし","継続",
+"あと少し","空気が違う","勾配の終端","視界が開く",
+"頂上は近い","地面が緩む","光が増える","傾きが終わる","立っている",
+"息を吐く","静寂","足が止まる","余韻が残る","確かに登った",
+"戻らない時間","坂は背後","視線が上がる","終点の感触","完了"
+];
+
+function climb() {
+    if (isLocked) return;
+
+    if (finished) {
+        step = 0;
+        finished = false;
+        document.getElementById("road").style.backgroundPosition = "0% 0%";
+        document.getElementById("counter").textContent = "0 / 100";
+        document.getElementById("message").textContent = "また、ここから";
+        return;
+    }
+
+    step++;
+    document.getElementById("counter").textContent = `${step} / 100`;
+
+    if (step < 100) {
+        document.getElementById("road").style.backgroundPosition =
+            `0% ${-step * 5}%`;
+        document.getElementById("message").textContent = words[step - 1];
+    }
+
+    if (step === 100) {
+        isLocked = true;
+        document.getElementById("climbBtn").disabled = true;
+        document.getElementById("message").textContent =
+            "――登り切った。達成感は、少し遅れてやってきた。――";
+
+        setTimeout(() => {
+            document.getElementById("climbBtn").disabled = false;
+            isLocked = false;
+            finished = true;
+        }, 3000);
+    }
+}
+</script>
+</body>
+</html>
